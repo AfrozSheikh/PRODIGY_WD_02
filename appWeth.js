@@ -1,67 +1,80 @@
+let timer = document.getElementById("stopwatch");
+let lapList = document.getElementById("laplist");
+let hr = 0;
+let min = 0;
+let sec = 0;
+let stop = true;
 
-let container = document.querySelector(".container");
-let search = document.querySelector('.search_box button');
-let weatherBox = document.querySelector('.weather-box');
-let weatherDetails = document.querySelector('.weather-details');
+let lap = 1;
 
-search.addEventListener('click', ()=>{
-	async function checkWeather() {
-		const apiKey = '0af979fdc28f0ea1eb074f789a5a8735';
-		let c = document.querySelector('.search_box input').value; // Default to "DELHI" if cityValue is empty
-		let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${c}&units=metric&appid=${apiKey}`;
-	
-		if (c === '') {
-			return;
-		}
-	
-		try {
-			let response = await fetch(apiUrl);
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
-			let data = await response.json();
-			const image = document.querySelector('.weather-box img');
-			const temperature = document.querySelector('.weather-box .temperature');
-			const description = document.querySelector('.weather-box .description');
-			const humidity = document.querySelector('.weather-details .humidity span');
-			const wind = document.querySelector('.weather-details .Wind span');
-			
+function start(){
+    if(stop == true){
+        stop = false;
+        runtime();
+    }
+}
 
-			switch(data.weather[0].main){
-			case 'Clear':
-				image.src = 'images/clear.png';
-				break;
+function stopTime(){
+    if(stop == false){
+        stop = true;
+    }
+}
 
-			case 'Rain':
-				image.src = 'images/rain.png';
-				break;
-			case 'Snow' || 'Light snow':
-				image.src = 'images/snow.png';
-				break;
-			case 'Mist':
-				image.src = 'images/mist.png';
-				break;
-			case 'Clouds':
-				images.src= 'images/cloud/png';
-				break;
-			default:
-				image.src ='images/cloud.png';
-			}
-			console.log(data);
-			console.log(data.wind.speed);
-			let dec = `${data.weather[0].description}`;
-			console.log(dec);
-			temperature.innerHTML = `${parseInt(data.main.temp)}<span>°C</span>`;
-			description.innerHTML = dec;
-			humidity.innerHTML = `${data.main.humidity}%`;
-			wind.innerHTML = `${data.wind.speed}km/h`;
-			
-		} catch (error) {
-			console.error('Error:', error.message);
-		}
-	}
-	
-	
-	checkWeather();
-	
-});
+function recordLap() {
+   
+    if (stop == false) {
+        let lapTime = `${hr} hr : ${min} min : ${sec} sec`;
+        let lapItem = document.createElement("li");
+        lapItem.textContent = `Lap ${lap}: ${lapTime}`;
+        //let lapList = document.getElementById("laplist");
+        lapList.appendChild(lapItem);
+        lap++;
+    }
+}
+
+function runtime(){
+    if(stop == false){
+        sec = parseInt(sec);
+        min = parseInt(min);
+        hr = parseInt(hr);
+
+        sec++;
+
+        if(sec == 60){
+            min++;
+            sec = 0;
+        }
+        if(min == 60){
+            hr++;
+            min = 0;
+            sec = 0;
+        }
+        if(sec<10){
+            sec = '0'+sec;
+        }
+        if(min<10){
+            min = '0'+min;
+        }
+        if(hr<10){
+            hr = '0'+hr;
+        }
+
+        timer.innerHTML = hr + "<p>hr</p>:" + min + "<p>min</p> : " + sec + "<p>sec</p>";
+
+        setTimeout("runtime()", 1000);
+    }
+}
+
+function reset() {
+    timer.innerHTML = "00 <p>hr</p> : 00 <p>min</p> : 00 <p>sec</p>";
+    stop = true;
+    hr = 0;
+    sec = 0;
+    min = 0;
+    lap = 1; // Reset lap counter
+    lapList = document.getElementById("laplist");
+    // Clear lap times by removing all list items (laps)
+    while (lapList.firstChild) {
+        lapList.removeChild(lapList.firstChild);
+    }
+}
